@@ -17,21 +17,22 @@ func randLetter(n int) string {
 }
 
 func Upload(c *fiber.Ctx) error {
-	form, err := c.MultipartForm()
+	file, err := c.FormFile("file")
 	if err != nil {
-		return err
+		c.Status(400)
+		return c.JSON(fiber.Map{
+			"message": "Error in file upload",
+		})
 	}
-	files := form.File["file"]
-	fileName := ""
+	filename := randLetter(5) + "-" + file.Filename
 
-	for _, file := range files {
-
-		fileName = randLetter(5) + "-" + file.Filename
-		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
-			return nil
-		}
+	if err := c.SaveFile(file, "./uploads/"+filename); err != nil {
+		return c.JSON(fiber.Map{
+			"message": "could not save file",
+		})
 	}
 	return c.JSON(fiber.Map{
-		"url": "http://localhost:3000/api/uploads/" + fileName,
+		"url":  "http://localhost:3000/api/uploads/" + filename,
+		"name": filename,
 	})
 }

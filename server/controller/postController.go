@@ -4,12 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"net/http"
 	"strconv"
 
 	"github.com/ajayramavath/geo-data-app/server/database"
 	"github.com/ajayramavath/geo-data-app/server/models"
 	"github.com/ajayramavath/geo-data-app/server/util"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"gorm.io/gorm"
 )
 
@@ -25,8 +27,25 @@ func CreatePost(c *fiber.Ctx) error {
 		})
 
 	}
+
+	// file, err := c.FormFile("file")
+	// if err != nil {
+	// 	c.Status(400)
+	// 	return c.JSON(fiber.Map{
+	// 		"message": "Error in file upload",
+	// 	})
+	// }
+	// filename := randLetter(5) + "-" + file.Filename
+
+	// if err := c.SaveFile(file, "./uploads/"+filename); err != nil {
+	// 	return c.JSON(fiber.Map{
+	// 		"message": "could not save file",
+	// 	})
+	// }
 	return c.JSON(fiber.Map{
 		"message": "Congrats, Your post is live",
+		"post":    post,
+		//"url":     "http://localhost:3000/api/uploads/" + filename,
 	})
 
 }
@@ -43,9 +62,19 @@ func GetAllPosts(c *fiber.Ctx) error {
 		"meta": fiber.Map{
 			"total":     total,
 			"page":      page,
-			"last_page": math.Ceil(float64(int(total) / limit)),
+			"last_page": math.Ceil((float64(int(total) / limit))),
 		},
 	})
+}
+func SendFile(c *fiber.Ctx) error {
+	fileName := c.Params("name")
+	err := filesystem.SendFile(c, http.Dir("./uploads"), "./uploads"+fileName)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"message": "Something Happened",
+		})
+	}
+	return nil
 }
 
 func PostById(c *fiber.Ctx) error {

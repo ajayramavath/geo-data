@@ -20,8 +20,10 @@ func Setup(app *fiber.App) {
 	app.Get("/api/uniquepost", controller.UserPosts)
 	app.Get("/api/allpost", controller.GetAllPosts)
 	app.Get("/api/post/:id", controller.PostById)
+	app.Use("/api/getfile/:name", controller.SendFile)
 	app.Delete("/api/deletepost/:id", controller.DeletePost)
 	app.Post("/api/upload-file", controller.Upload)
+	app.Post("/api/logout", controller.Logout)
 	app.Static("/api/uploads", "./uploads")
 
 }
